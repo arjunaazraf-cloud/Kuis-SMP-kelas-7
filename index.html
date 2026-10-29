@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Quest V6 - Kelas 7.4 + Random Jawaban</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #f0fdf4; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  .card { background: #fff; border-radius: 16px; padding: 2rem; max-width: 620px; width: 100%; box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
+  .intro-wrap { text-align: center; padding: 2rem 0; }
+  .intro-icon { font-size: 56px; margin-bottom: 1rem; }
+  .intro-title { font-size: 28px; font-weight: 700; color: #15803d; margin-bottom: 8px; }
+  .intro-sub { font-size: 15px; color: #666; margin-bottom: 1.5rem; line-height: 1.8; }
+  .sound-btn { background: #f0fdf4; color: #15803d; border: 2px solid #16a34a; border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 1rem; transition: all 0.15s; }
+  .sound-btn:hover { background: #dcfce7; }
+  .sound-btn.active { background: #16a34a; color: #fff; }
+  .start-btn { background: #16a34a; color: #fff; border: none; border-radius: 10px; padding: 14px 36px; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s; margin-top: 0.5rem; }
+  .start-btn:hover { background: #15803d; }
+  .subject-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin: 1rem 0 1.25rem; }
+  .subject-btn { background:#fff; border:2px solid #dcfce7; border-radius:12px; padding:14px 10px; text-align:left; cursor:pointer; transition:all .15s; color:#14532d; display:flex; align-items:center; gap:10px; min-height:68px; }
+  .subject-btn:hover, .subject-btn.selected { border-color:#16a34a; background:#f0fdf4; box-shadow:0 0 0 2px rgba(22,163,74,.08); }
+  .subject-emoji { font-size:25px; }
+  .subject-name { font-weight:700; font-size:14px; }
+  .subject-desc { color:#777; font-size:11px; margin-top:3px; }
+  .intro-subject-label { text-align:left; font-size:13px; color:#555; font-weight:700; margin-top:1.25rem; }
+  .timer-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .timer-box { font-size: 15px; font-weight: 700; padding: 6px 14px; border-radius: 99px; transition: background 0.3s, color 0.3s; }
+  .timer-box.reading { background: #fef9c3; color: #a16207; }
+  .timer-box.running { background: #dcfce7; color: #15803d; }
+  .timer-box.warning { background: #fed7aa; color: #c2410c; }
+  .timer-box.danger { background: #fee2e2; color: #dc2626; animation: pulse 0.5s infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+  .phase-label { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px; }
+  .phase-label.reading { background: #fef9c3; color: #a16207; }
+  .phase-label.running { background: #dcfce7; color: #15803d; }
+  .progress-bar-bg { background: #dcfce7; border-radius: 99px; height: 7px; margin-bottom: 1.5rem; }
+  .progress-bar-fill { background: #16a34a; border-radius: 99px; height: 7px; transition: width 0.4s ease; }
+  .question-counter { font-size: 13px; color: #888; }
+  .question-text { font-size: 16px; font-weight: 500; color: #111; margin-bottom: 1.5rem; line-height: 1.6; }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+  .option-btn { background: #fff; border: 1.5px solid #d1d5db; border-radius: 10px; padding: 13px 16px; font-size: 14px; color: #111; cursor: pointer; text-align: left; transition: all 0.15s; line-height: 1.4; }
+  .option-btn:hover:not(:disabled) { background: #f0fdf4; border-color: #16a34a; }
+  .option-btn.locked { opacity: 0.5; cursor: not-allowed; }
+  .option-btn.correct { background: #dcfce7; border-color: #16a34a; color: #14532d; font-weight: 600; opacity: 1; }
+  .option-btn.wrong { background: #fee2e2; border-color: #dc2626; color: #7f1d1d; opacity: 1; }
+  .option-btn.reveal-correct { background: #dcfce7; border-color: #16a34a; color: #14532d; font-weight: 600; opacity: 1; }
+  .option-btn:disabled { cursor: default; }
+  .feedback-box { border-radius: 8px; padding: 12px 16px; font-size: 14px; margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 10px; line-height: 1.5; }
+  .feedback-box.correct { background: #dcfce7; color: #14532d; }
+  .feedback-box.wrong { background: #fee2e2; color: #7f1d1d; }
+  .feedback-box.timeout { background: #fef9c3; color: #a16207; }
+  .feedback-box i { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .nav-row { display: flex; justify-content: flex-end; }
+  .next-btn { background: #16a34a; color: #fff; border: none; border-radius: 8px; padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .next-btn:hover { background: #15803d; }
+  .result-wrap { text-align: center; padding: 1rem 0; }
+  .score-circle { width: 110px; height: 110px; border-radius: 50%; background: #dcfce7; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.5rem; border: 3px solid #16a34a; }
+  .score-num { font-size: 30px; font-weight: 700; color: #15803d; line-height: 1; }
+  .score-label { font-size: 12px; color: #16a34a; margin-top: 2px; }
+  .result-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #111; }
+  .result-sub { font-size: 14px; color: #888; margin-bottom: 1.5rem; }
+  .result-answers { text-align: left; margin-bottom: 1.5rem; }
+
+  .result-tier { margin: 12px auto 18px; padding: 12px 14px; max-width: 520px; border-radius: 12px; font-weight: 800; line-height: 1.5; }
+  .result-tier.low { background:#fff1f2; color:#9f1239; border:1px solid #fecdd3; }
+  .result-tier.mid { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; }
+  .result-tier.high { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
+  .pinata-burst { position:fixed; inset:0; z-index:9999; pointer-events:none; overflow:hidden; display:none; }
+  .pinata-burst.show { display:block; }
+  .pinata-emoji { position:absolute; left:50%; top:42%; font-size:clamp(76px,18vw,140px); transform:translate(-50%,-50%) scale(.2) rotate(-25deg); animation:pinata-pop .9s ease-out forwards; filter:drop-shadow(0 10px 18px #0005); }
+  .confetti-piece { position:absolute; top:-24px; width:10px; height:16px; border-radius:2px; animation:confetti-fall 2.4s ease-in forwards; }
+  @keyframes pinata-pop { 0%{transform:translate(-50%,-50%) scale(.2) rotate(-25deg);opacity:0} 45%{transform:translate(-50%,-50%) scale(1.15) rotate(12deg);opacity:1} 70%{transform:translate(-50%,-50%) scale(.95) rotate(-8deg)} 100%{transform:translate(-50%,-50%) scale(1) rotate(0);opacity:0} }
+  @keyframes confetti-fall { 0%{transform:translateY(-10px) rotate(0);opacity:1} 100%{transform:translateY(110vh) rotate(800deg);opacity:0} }
+
+  .ans-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+  .ans-item:last-child { border-bottom: none; }
+  .ans-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .ans-q { color: #888; margin-bottom: 2px; font-size: 13px; }
+  .restart-btn { background: #16a34a; color: #fff; border: none; border-radius: 8px; padding: 11px 26px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .restart-btn:hover { background: #15803d; }
+  @media (max-width: 480px) { .options-grid { grid-template-columns: 1fr; } .subject-grid { grid-template-columns:1fr 1fr; gap:8px; } .subject-btn { padding:11px 8px; gap:7px; } .card { padding: 1.25rem; } }
+
+  .mini-launch-card { margin-top: 1.1rem; padding: 15px; border-radius: 14px; border: 1px solid #263762; background: linear-gradient(145deg,#101b3b,#080d20); color:#fff; text-align:left; }
+  .mini-launch-card h3 { color:#00d9ff; margin-bottom:5px; font-size:16px; }
+  .mini-launch-card p { color:#b5c3e8; font-size:12px; line-height:1.6; margin-bottom:10px; }
+  .mini-launch-btn { width:100%; border:1px solid #00f5ff; border-radius:10px; background:#00f5ff; color:#04101c; padding:12px; font-weight:900; cursor:pointer; }
+  .mini-shell { color:#fff; background:radial-gradient(ellipse at top,#15214b 0%,#080d20 42%,#03050e 100%); border-radius:14px; padding:14px 10px 18px; margin:-.5rem; }
+  .mini-app { width:100%; max-width:500px; margin:auto; font-family:Arial,sans-serif; text-align:center; }
+  .mini-logo { font-size:clamp(24px,7vw,34px); font-weight:900; letter-spacing:2px; color:#00f5ff; text-shadow:0 0 6px #00f5ff,0 0 18px #00aaff; }
+  .mini-subtitle { margin:5px 0 14px; font-size:9px; letter-spacing:3px; color:#8395c9; }
+  .mini-hud { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:10px; }
+  .mini-stat { padding:9px 3px; background:linear-gradient(145deg,#111b3b,#080d20); border:1px solid #263762; border-radius:10px; }
+  .mini-stat-label { display:block; margin-bottom:4px; font-size:9px; letter-spacing:1px; color:#8fa4d6; }
+  .mini-stat-value { font-size:20px; font-weight:900; }
+  .mini-game-frame { position:relative; width:100%; overflow:hidden; border:2px solid #00f5ff; border-radius:14px; background:#050816; box-shadow:0 0 10px #00f5ff88,0 0 30px #00f5ff22; }
+  .mini-canvas { display:block; width:100%; height:auto; aspect-ratio:420/660; touch-action:none; }
+  .mini-overlay { position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#030615e8; backdrop-filter:blur(5px); }
+  .mini-overlay.hidden { display:none; }
+  .mini-overlay h2 { color:#00f5ff; font-size:27px; font-weight:900; letter-spacing:1px; text-shadow:0 0 18px #00f5ff; }
+  .mini-overlay p { max-width:280px; margin:10px 0 16px; color:#c1cce9; line-height:1.6; font-size:13px; }
+  .mini-primary { padding:12px 18px; border:1px solid #00f5ff; border-radius:10px; color:#001014; background:#00f5ff; box-shadow:0 0 20px #00f5ff55; font-weight:900; cursor:pointer; }
+  .mini-controls { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:10px; }
+  .mini-move { height:55px; border:1px solid #00c9ff; border-radius:12px; background:linear-gradient(145deg,#101f43,#080e20); color:#00f5ff; font-size:27px; touch-action:none; }
+  .mini-move.active { background:#00c9ff; color:#020816; }
+  .mini-actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; margin-top:8px; }
+  .mini-action { padding:10px 4px; border:1px solid #37476e; border-radius:9px; background:#0b1229; color:#bdc9ed; font-size:11px; font-weight:800; cursor:pointer; }
+  .mini-help { margin:11px 0 5px; color:#9aabd4; font-size:11px; line-height:1.7; }
+  .mini-best { margin-top:6px; color:#9aabd4; font-size:11px; }
+  .mini-back { margin-bottom:12px; width:100%; padding:10px; border:1px solid #37476e; border-radius:9px; color:#d7e1ff; background:#0b1229; font-weight:800; cursor:pointer; }
+
+
+  .class-roster { position:fixed; top:10px; right:10px; z-index:10000; width:min(205px, calc(100vw - 20px)); font-family:Arial,sans-serif; }
+  .roster-toggle { width:100%; border:1px solid #86efac; border-radius:12px; padding:10px 12px; background:#14532d; color:#fff; font-size:12px; font-weight:900; text-align:left; cursor:pointer; box-shadow:0 4px 14px #0002; }
+  .roster-panel { display:none; margin-top:6px; padding:11px; border:1px solid #bbf7d0; border-radius:12px; background:#fff; box-shadow:0 8px 24px #0002; }
+  .roster-panel.open { display:block; }
+  .roster-heading { margin-bottom:8px; color:#166534; font-size:12px; font-weight:900; letter-spacing:.5px; }
+  .roster-person { display:flex; flex-direction:column; gap:3px; padding:9px 0; border-top:1px solid #dcfce7; color:#111827; font-size:13px; font-weight:700; }
+  .roster-rank { color:#15803d; font-size:10px; font-weight:900; letter-spacing:.6px; }
+  @media (max-width:480px) { .class-roster { width:154px; } .roster-toggle { padding:8px 9px; font-size:11px; } .roster-person { font-size:12px; } }
+
+</style>
+</head>
+<body>
+<div class="class-roster">
+  <button class="roster-toggle" onclick="toggleRoster()" aria-expanded="false">👥 KELAS 7.4 ▾</button>
+  <div class="roster-panel" id="roster-panel">
+    <div class="roster-heading">DAFTAR NAMA</div>
+    <div class="roster-person">
+      <span>Azraf Arjuna Sandy</span>
+      <span class="roster-rank">👑 OWNER WEB</span>
+    </div>
+  </div>
+</div>
+<div class="card"><div id="root"></div></div>
+
+<template id="minigame-template">
+  <div class="mini-shell">
+    <div class="mini-app">
+      <button class="mini-back" onclick="exitMinigame()">← KEMBALI KE STUDY QUEST</button>
+      <header>
+        <h1 class="mini-logo">NEON DODGE X</h1>
+        <p class="mini-subtitle">SURVIVE THE NEON STORM</p>
+      </header>
+      <section class="mini-hud">
+        <div class="mini-stat"><span class="mini-stat-label">SCORE</span><span class="mini-stat-value" id="mini-score" style="color:#00f5ff">0</span></div>
+        <div class="mini-stat"><span class="mini-stat-label">LEVEL</span><span class="mini-stat-value" id="mini-level" style="color:#ff316f">1</span></div>
+        <div class="mini-stat"><span class="mini-stat-label">COINS</span><span class="mini-stat-value" id="mini-coins" style="color:#ffe66d">0</span></div>
+      </section>
+      <main class="mini-game-frame">
+        <canvas class="mini-canvas" id="mini-game" width="420" height="660"></canvas>
+        <div class="mini-overlay hidden" id="mini-overlay">
+          <h2 id="mini-overlay-title">GAME OVER</h2>
+          <p id="mini-overlay-text">Permainan selesai.</p>
+          <div id="mini-final-score" style="margin:5px 0;color:#ffe66d;font-size:26px;font-weight:900">0 POINTS</div>
+          <p id="mini-overlay-details"></p>
+          <button class="mini-primary" id="mini-play-again">MAIN LAGI ↻</button>
+        </div>
+      </main>
+      <section class="mini-controls">
+        <button class="mini-move" id="mini-left" aria-label="Kiri">◀</button>
+        <button class="mini-move" id="mini-right" aria-label="Kanan">▶</button>
+      </section>
+      <section class="mini-actions">
+        <button class="mini-action" id="mini-pause">Ⅱ PAUSE</button>
+        <button class="mini-action" id="mini-reset">↻ RESTART</button>
+        <button class="mini-action" onclick="exitMinigame()">⌂ MENU</button>
+      </section>
+      <p class="mini-help"><strong>◀ ▶</strong> untuk bergerak · Hindari blok merah dan ambil koin emas.<br>Di HP, kamu juga bisa menggeser pesawat di layar. Keyboard: ← → atau A/D, spasi untuk pause, R untuk restart.</p>
+      <div class="mini-best">BEST SCORE: <strong id="mini-best" style="color:#ffe66d">0</strong></div>
+    </div>
+  </div>
+</template>
+
+<script>
+const MUSIC_URL = 'https://arjunaazraf-cloud.github.io/Kuis-SMP-kelas-7/musik.mp3';
+
+const RESULT_SOUNDS = {
+  low: 'wkwk.mp3',       // 1–50%
+  mid: 'bolehlah.mp3',   // 51–80%
+  high: 'gg.mp3'         // di atas 80%
+};
+let resultSound = null;
+let resultFxTimer = null;
+
+function playResultSound(tier) {
+  try {
+    if (resultSound) { resultSound.pause(); resultSound.currentTime = 0; }
+    resultSound = new Audio(RESULT_SOUNDS[tier]);
+    resultSound.volume = 0.9;
+    resultSound.play().catch(() => {
+      // Browser may block playback if the sound file is missing or audio isn't unlocked.
+    });
+  } catch (e) {}
+}
+function launchPinataBurst() {
+  let overlay = document.getElementById('pinata-burst');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'pinata-burst';
+    overlay.className = 'pinata-burst';
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = '<div class="pinata-emoji">🪅</div>';
+  for (let i = 0; i < 90; i++) {
+    const piece = document.createElement('span');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.animationDelay = (Math.random() * 0.65) + 's';
+    piece.style.animationDuration = (1.6 + Math.random() * 1.5) + 's';
+    piece.style.background = ['#ff4d6d','#ffd166','#06d6a0','#4cc9f0','#b5179e','#f77f00'][i % 6];
+    piece.style.transform = 'rotate(' + Math.floor(Math.random() * 360) + 'deg)';
+    overlay.appendChild(piece);
+  }
+  overlay.classList.add('show');
+  clearTimeout(resultFxTimer);
+  resultFxTimer = setTimeout(() => {
+    overlay.classList.remove('show');
+    overlay.innerHTML = '';
+  }, 3600);
+}
+
+const READ_TIME = 5, ANSWER_TIME = 30;
+
+const subjectQuestions = {
+  math: [
+    { q: "15 + 25 = ...", options: ["40", "30", "50", "35"], answer: 0, explanation: "15 + 25 = 40." },
+    { q: "12 × 4 = ...", options: ["48", "36", "44", "52"], answer: 0, explanation: "12 × 4 = 48." },
+    { q: "Hasil 100 : 5 = ...", options: ["20", "25", "10", "15"], answer: 0, explanation: "100 ÷ 5 = 20." },
+    { q: "Bilangan prima adalah...", options: ["2", "4", "6", "9"], answer: 0, explanation: "2 adalah bilangan prima karena hanya memiliki dua faktor positif: 1 dan 2." },
+    { q: "3² = ...", options: ["9", "6", "3", "12"], answer: 0, explanation: "3² berarti 3 × 3 = 9." },
+    { q: "Akar kuadrat dari 64...", options: ["8", "6", "7", "9"], answer: 0, explanation: "√64 = 8 karena 8 × 8 = 64." },
+    { q: "Keliling persegi dengan sisi 5 cm...", options: ["20 cm", "25 cm", "10 cm", "15 cm"], answer: 0, explanation: "Keliling persegi = 4 × sisi = 4 × 5 = 20 cm." },
+    { q: "Luas persegi panjang dengan p = 8 cm dan l = 5 cm...", options: ["40 cm²", "26 cm²", "13 cm²", "80 cm²"], answer: 0, explanation: "Luas = panjang × lebar = 8 × 5 = 40 cm²." },
+    { q: "1/2 + 1/2 = ...", options: ["1", "2", "1/4", "2/4"], answer: 0, explanation: "Penyebut sama, jadi 1/2 + 1/2 = 2/2 = 1." },
+    { q: "0,5 dalam bentuk pecahan sederhana...", options: ["1/2", "1/4", "1/5", "1/3"], answer: 0, explanation: "0,5 = 5/10 = 1/2." },
+    { q: "Sudut siku-siku besarnya...", options: ["90°", "180°", "45°", "60°"], answer: 0, explanation: "Sudut siku-siku besarnya tepat 90°." },
+    { q: "7x − 3x = ...", options: ["4x", "10x", "3x", "7x"], answer: 0, explanation: "Suku sejenis dikurangkan: 7x − 3x = 4x." },
+    { q: "KPK dari 4 dan 6...", options: ["12", "24", "6", "8"], answer: 0, explanation: "Kelipatan 4: 4, 8, 12; kelipatan 6: 6, 12. KPK-nya 12." },
+    { q: "FPB dari 12 dan 18...", options: ["6", "12", "18", "3"], answer: 0, explanation: "Faktor persekutuan terbesar 12 dan 18 adalah 6." },
+    { q: "Diameter lingkaran sama dengan 2 × ...", options: ["Jari-jari", "Keliling", "Luas", "Sisi"], answer: 0, explanation: "Diameter = 2 × jari-jari." },
+    { q: "Volume kubus dengan sisi 3 cm...", options: ["27 cm³", "9 cm³", "18 cm³", "12 cm³"], answer: 0, explanation: "Volume kubus = sisi³ = 3³ = 27 cm³." },
+    { q: "Rata-rata dari 2, 4, 6...", options: ["4", "6", "3", "12"], answer: 0, explanation: "Rata-rata = (2 + 4 + 6) ÷ 3 = 4." },
+    { q: "Modus dari 1, 2, 2, 3, 4...", options: ["2", "1", "3", "4"], answer: 0, explanation: "Modus adalah nilai yang paling sering muncul; di sini 2." },
+    { q: "25% dari 100...", options: ["25", "50", "75", "100"], answer: 0, explanation: "25% × 100 = 25." },
+    { q: "10 − (−5) = ...", options: ["15", "5", "−15", "−5"], answer: 0, explanation: "Mengurangi bilangan negatif sama dengan menambah: 10 + 5 = 15." },
+    { q: "Setiap sudut segitiga sama sisi...", options: ["60°", "90°", "45°", "30°"], answer: 0, explanation: "Jumlah sudut segitiga 180°; pada segitiga sama sisi, tiap sudut 180° ÷ 3 = 60°." },
+    { q: "Luas lingkaran dengan r = 7 dan π = 22/7...", options: ["154", "44", "77", "49"], answer: 0, explanation: "Luas = πr² = 22/7 × 7 × 7 = 154 satuan luas." },
+    { q: "2 jam = ... menit", options: ["120", "60", "100", "200"], answer: 0, explanation: "1 jam = 60 menit, jadi 2 jam = 120 menit." },
+    { q: "Jika x + 5 = 10, maka x = ...", options: ["5", "10", "15", "20"], answer: 0, explanation: "Kurangi kedua sisi dengan 5: x = 10 − 5 = 5." },
+    { q: "Gradien garis y = 2x + 1...", options: ["2", "1", "3", "0"], answer: 0, explanation: "Pada bentuk y = mx + c, gradien adalah koefisien x, yaitu 2." },
+    { q: "Hipotenusa segitiga siku-siku dengan sisi 3 dan 4...", options: ["5", "6", "7", "8"], answer: 0, explanation: "Teorema Pythagoras: √(3² + 4²) = √25 = 5." },
+    { q: "1 kg = ... gram", options: ["1000", "100", "10", "1"], answer: 0, explanation: "Satu kilogram sama dengan 1.000 gram." },
+    { q: "Peluang muncul satu sisi tertentu pada koin seimbang...", options: ["1/2", "1/3", "1/4", "1"], answer: 0, explanation: "Koin seimbang punya dua hasil sama mungkin, jadi peluang satu sisi = 1/2." },
+    { q: "Median dari 1, 3, 5, 7, 9...", options: ["5", "3", "7", "9"], answer: 0, explanation: "Median adalah nilai tengah setelah data diurutkan, yaitu 5." },
+    { q: "2³ × 2² = ...", options: ["32", "16", "8", "64"], answer: 0, explanation: "Untuk basis sama, pangkat dijumlahkan: 2³ × 2² = 2⁵ = 32." }
+  ],
+  informatika: [
+    { q: "Perangkat untuk menampilkan hasil proses disebut...", options: ["Input", "Output", "Process", "Storage"], answer: 1, explanation: "Output adalah perangkat keluaran. Monitor dan printer menampilkan hasil." },
+    { q: "CPU singkatan dari...", options: ["Central Processing Unit", "Computer Personal Unit", "Central Program Unit", "Control Processing Unit"], answer: 0, explanation: "CPU adalah Central Processing Unit, bagian utama yang memproses instruksi." },
+    { q: "1 Byte = ... bit", options: ["2", "4", "8", "16"], answer: 2, explanation: "Satu byte terdiri dari 8 bit." },
+    { q: "Sistem operasi buatan Microsoft adalah...", options: ["Android", "Windows", "Linux", "iOS"], answer: 1, explanation: "Windows adalah sistem operasi yang dikembangkan Microsoft." },
+    { q: "Yang termasuk software pengolah kata...", options: ["Excel", "Word", "PowerPoint", "Photoshop"], answer: 1, explanation: "Microsoft Word digunakan untuk membuat dan mengedit dokumen teks." },
+    { q: "Shortcut untuk menyalin adalah...", options: ["Ctrl+V", "Ctrl+C", "Ctrl+X", "Ctrl+Z"], answer: 1, explanation: "Ctrl+C menyalin; Ctrl+V menempelkan hasil salinan." },
+    { q: "Jaringan yang mencakup area satu gedung disebut...", options: ["WAN", "LAN", "MAN", "PAN"], answer: 1, explanation: "LAN (Local Area Network) mencakup area lokal seperti rumah atau gedung." },
+    { q: "WWW singkatan dari...", options: ["World Wide Web", "World Web Wide", "Wide World Web", "Web World Wide"], answer: 0, explanation: "WWW adalah World Wide Web." },
+    { q: "Bahasa yang digunakan untuk menyusun halaman web adalah...", options: ["HTML", "Padi", "Jagung", "Beras"], answer: 0, explanation: "HTML digunakan untuk menyusun struktur halaman web." },
+    { q: "Topologi jaringan yang berbentuk lingkaran...", options: ["Star", "Ring", "Bus", "Mesh"], answer: 1, explanation: "Topologi Ring menghubungkan perangkat membentuk lingkaran." },
+    { q: "Untuk mencari dan membuka informasi di internet kita menggunakan...", options: ["Browser", "Calculator", "Paint", "Notepad"], answer: 0, explanation: "Browser digunakan untuk mengakses situs web." },
+    { q: "File gambar biasanya berekstensi...", options: [".mp3", ".jpg", ".docx", ".exe"], answer: 1, explanation: "JPG adalah salah satu format berkas gambar." },
+    { q: "Yang termasuk input device...", options: ["Mouse", "Monitor", "Printer", "Speaker"], answer: 0, explanation: "Mouse memasukkan perintah; monitor, printer, dan speaker adalah perangkat keluaran." },
+    { q: "Fungsi utama RAM adalah...", options: ["Menyimpan data sementara", "Menyimpan data permanen", "Mencetak", "Menampilkan gambar"], answer: 0, explanation: "RAM menyimpan data sementara saat perangkat sedang digunakan." },
+    { q: "Bilangan biner hanya terdiri dari...", options: ["0 dan 1", "0-9", "A-Z", "1 dan 2"], answer: 0, explanation: "Sistem bilangan biner memakai digit 0 dan 1." },
+    { q: "Alamat email harus memiliki tanda...", options: ["#", "@", "$", "%"], answer: 1, explanation: "Tanda @ memisahkan nama pengguna dan domain pada alamat email." },
+    { q: "Perintah untuk menyimpan file...", options: ["Save", "Open", "Close", "Delete"], answer: 0, explanation: "Save berarti menyimpan berkas." },
+    { q: "Google, Bing, Yahoo adalah contoh...", options: ["Search Engine", "Email", "Game", "OS"], answer: 0, explanation: "Search engine adalah mesin pencari informasi di internet." },
+    { q: "Salah satu bahaya internet bagi anak adalah...", options: ["Hoaks dan cyberbullying", "Listrik mati", "Komputer rusak", "Printer kehabisan tinta"], answer: 0, explanation: "Hoaks menyebarkan informasi palsu, sedangkan cyberbullying adalah perundungan daring." },
+    { q: "Etika menggunakan internet disebut...", options: ["Netiket", "Sopan", "Santun", "Internet Sehat"], answer: 0, explanation: "Netiket berasal dari net etiquette, yaitu etika saat berinternet." },
+    { q: "Algoritma adalah...", options: ["Urutan langkah logis", "Alat masak", "Jenis komputer", "Virus"], answer: 0, explanation: "Algoritma adalah urutan langkah logis untuk menyelesaikan masalah." },
+    { q: "Flowchart menggunakan simbol...", options: ["Gambar atau bentuk tertentu", "Tulisan saja", "Angka saja", "Huruf saja"], answer: 0, explanation: "Flowchart menggambarkan alur proses menggunakan simbol-simbol." },
+    { q: "Malware yang mengunci data dan meminta tebusan...", options: ["Ransomware", "Hardware", "Software", "Freeware"], answer: 0, explanation: "Ransomware mengunci atau mengenkripsi data lalu menuntut tebusan." },
+    { q: "Fungsi firewall...", options: ["Melindungi jaringan", "Mendinginkan CPU", "Mencetak dokumen", "Mempercepat internet"], answer: 0, explanation: "Firewall membantu menyaring lalu lintas jaringan yang masuk dan keluar." },
+    { q: "Urutan kapasitas penyimpanan dari terbesar ke terkecil...", options: ["KB-MB-GB-TB", "TB-GB-MB-KB", "MB-KB-GB-TB", "GB-TB-MB-KB"], answer: 1, explanation: "Urutan dari terbesar ke terkecil adalah TB, GB, MB, lalu KB." },
+    { q: "Perangkat yang dapat menghubungkan perangkat ke jaringan Wi-Fi...", options: ["Router", "Printer", "Scanner", "Speaker"], answer: 0, explanation: "Router menghubungkan jaringan dan dapat menyediakan Wi-Fi." },
+    { q: "Ekstensi file presentasi PowerPoint modern...", options: [".pptx", ".xlsx", ".docx", ".mp4"], answer: 0, explanation: ".pptx adalah ekstensi berkas presentasi PowerPoint." },
+    { q: "Yang bukan media penyimpanan...", options: ["Flashdisk", "Hard disk", "SSD", "Keyboard"], answer: 3, explanation: "Keyboard adalah perangkat input, bukan media penyimpanan." },
+    { q: "Coding visual untuk anak dan pemula...", options: ["Scratch", "Paint", "Word", "Excel"], answer: 0, explanation: "Scratch menggunakan blok visual untuk menyusun program." },
+    { q: "Kepanjangan IP pada IP Address...", options: ["Internet Protocol", "Internal Program", "Input Process", "Internet Program"], answer: 0, explanation: "IP adalah Internet Protocol, bagian dari sistem pengalamatan jaringan." }
+  ],
+  indonesia: [
+    { q: "Ide pokok paragraf disebut...", options: ["Gagasan utama", "Gagasan tambahan", "Hiasan", "Penutup"], answer: 0, explanation: "Gagasan utama adalah inti pembahasan paragraf." },
+    { q: "Cerita tentang pengalaman hidup diri sendiri disebut...", options: ["Fabel", "Cerpen", "Autobiografi", "Legenda"], answer: 2, explanation: "Autobiografi menceritakan riwayat hidup yang ditulis oleh orang itu sendiri." },
+    { q: "Kata yang artinya berlawanan disebut...", options: ["Sinonim", "Antonim", "Homonim", "Polisemi"], answer: 1, explanation: "Antonim adalah kata yang memiliki makna berlawanan." },
+    { q: "Tanda baca untuk akhir kalimat tanya...", options: ["?", "!", " .", ","], answer: 0, explanation: "Kalimat tanya diakhiri tanda tanya (?)." },
+    { q: "Pantun biasanya terdiri dari...", options: ["2 baris", "4 baris", "3 baris", "5 baris"], answer: 1, explanation: "Pantun umumnya terdiri dari empat baris." },
+    { q: "Dongeng tentang binatang...", options: ["Fabel", "Mitos", "Saga", "Legenda"], answer: 0, explanation: "Fabel adalah cerita yang tokohnya berupa binatang." },
+    { q: "Kata penghubung disebut...", options: ["Konjungsi", "Interjeksi", "Verba", "Nomina"], answer: 0, explanation: "Konjungsi menghubungkan kata, frasa, klausa, atau kalimat." },
+    { q: "Kalimat yang mengandung perintah disebut...", options: ["Imperatif", "Deklaratif", "Interogatif", "Eksklamatif"], answer: 0, explanation: "Kalimat imperatif berisi perintah atau permintaan." },
+    { q: "Puisi lama yang biasanya bersajak a-b-a-b...", options: ["Pantun", "Syair", "Gurindam", "Karmina"], answer: 0, explanation: "Pantun umumnya memiliki pola rima a-b-a-b." },
+    { q: "Unsur intrinsik cerpen, kecuali...", options: ["Tema", "Penerbit", "Tokoh", "Alur"], answer: 1, explanation: "Penerbit merupakan unsur luar, bukan unsur intrinsik cerita." },
+    { q: "Kata baku dari 'apotik' adalah...", options: ["Apotek", "Apotik", "Apotikk", "Apotick"], answer: 0, explanation: "Bentuk baku menurut ejaan bahasa Indonesia adalah apotek." },
+    { q: "Awalan me- + tulis menjadi...", options: ["Menulis", "Metulis", "Nulis", "Mentulis"], answer: 0, explanation: "Kata 'tulis' menjadi 'menulis' ketika mendapat awalan meN-." },
+    { q: "Cerita rakyat 'Si Miskin' dalam soal ini digolongkan sebagai...", options: ["Legenda", "Dongeng", "Fabel", "Mitos"], answer: 0, explanation: "Dalam kunci soal yang diberikan, jawaban yang digunakan adalah legenda." },
+    { q: "Teks yang menjelaskan cara membuat atau melakukan sesuatu...", options: ["Prosedur", "Narasi", "Deskripsi", "Argumentasi"], answer: 0, explanation: "Teks prosedur menjelaskan langkah-langkah melakukan sesuatu." },
+    { q: "Sinonim kata 'besar' yang tersedia...", options: ["Luas", "Kecil", "Sempit", "Sedikit"], answer: 0, explanation: "Dalam pilihan yang tersedia, 'luas' paling dekat maknanya dengan besar pada konteks ukuran." },
+    { q: "Kalimat efektif tidak...", options: ["Bertele-tele", "Jelas", "Logis", "Baku"], answer: 0, explanation: "Kalimat efektif harus hemat kata dan tidak bertele-tele." },
+    { q: "Gaya bahasa yang digunakan untuk mengungkapkan perbandingan disebut...", options: ["Majas", "Tata bahasa", "Ejaan", "Diksi"], answer: 0, explanation: "Majas adalah gaya bahasa untuk menghasilkan efek tertentu, termasuk perbandingan." },
+    { q: "Surat resmi menggunakan bahasa...", options: ["Baku", "Gaul", "Daerah", "Slang"], answer: 0, explanation: "Surat resmi menggunakan bahasa baku dan sesuai kaidah." },
+    { q: "Resensi adalah ulasan...", options: ["Buku atau karya", "Makanan", "Jalan", "Motor"], answer: 0, explanation: "Resensi membahas dan menilai suatu karya, misalnya buku." },
+    { q: "Tanda baca titik dua berbentuk...", options: [":", ";", ",", "."], answer: 0, explanation: "Tanda titik dua ditulis sebagai ':'." },
+    { q: "Kata tanya untuk menanyakan tempat...", options: ["Di mana", "Kapan", "Siapa", "Mengapa"], answer: 0, explanation: "'Di mana' digunakan untuk menanyakan tempat." },
+    { q: "Paragraf yang kalimat utamanya berada di awal disebut...", options: ["Deduktif", "Induktif", "Campuran", "Deskriptif"], answer: 0, explanation: "Paragraf deduktif menyampaikan gagasan utama di awal." },
+    { q: "Imbuhan yang terletak di akhir kata disebut...", options: ["Sufiks", "Prefiks", "Infiks", "Konfiks"], answer: 0, explanation: "Sufiks adalah imbuhan yang diletakkan di akhir kata." },
+    { q: "Cerita khayalan disebut...", options: ["Fiksi", "Nonfiksi", "Fakta", "Berita"], answer: 0, explanation: "Fiksi merupakan karya yang bersumber dari rekaan atau imajinasi." },
+    { q: "Huruf kapital digunakan untuk menulis...", options: ["Nama orang", "Kata benda umum", "Kata kerja", "Kata sifat"], answer: 0, explanation: "Huruf kapital digunakan pada awal nama orang." },
+    { q: "Teks laporan hasil observasi bersifat...", options: ["Objektif", "Subjektif", "Fiktif", "Imajinatif"], answer: 0, explanation: "Laporan observasi menyajikan hasil pengamatan secara objektif." },
+    { q: "Antonim kata 'rajin'...", options: ["Malas", "Giat", "Tekun", "Semangat"], answer: 0, explanation: "Lawan kata rajin adalah malas." },
+    { q: "Kalimat langsung ditandai dengan...", options: ["Tanda petik", "Tanda koma", "Tanda tanya", "Tanda seru"], answer: 0, explanation: "Kalimat langsung ditulis dengan tanda petik yang mengapit ucapan." },
+    { q: "Kata seru contohnya...", options: ["Wah", "Dan", "Atau", "Karena"], answer: 0, explanation: "'Wah' merupakan kata seru untuk menyatakan perasaan." },
+    { q: "Tujuan pidato persuasif...", options: ["Mengajak atau memengaruhi", "Menghibur saja", "Melarang semua hal", "Membenci"], answer: 0, explanation: "Pidato persuasif bertujuan memengaruhi pendengar agar menerima ajakan atau gagasan." }
+  ],
+  inggris: [
+    { q: "I ... a student.", options: ["am", "is", "are", "be"], answer: 0, explanation: "Subjek I dipasangkan dengan am." },
+    { q: "She ... not go to school yesterday.", options: ["did", "do", "does", "done"], answer: 0, explanation: "Kalimat negatif simple past memakai did not + kata kerja bentuk pertama." },
+    { q: "What is ... name?", options: ["your", "you", "yours", "you are"], answer: 0, explanation: "Your adalah kata kepemilikan yang menerangkan noun 'name'." },
+    { q: "They ... playing football now.", options: ["are", "is", "am", "was"], answer: 0, explanation: "They dipasangkan dengan are; present continuous memakai be + verb-ing." },
+    { q: "Plural of child...", options: ["children", "childs", "childrens", "childes"], answer: 0, explanation: "Bentuk jamak tidak beraturan dari child adalah children." },
+    { q: "... are you from?", options: ["Where", "When", "Who", "What"], answer: 0, explanation: "Where digunakan untuk menanyakan tempat asal." },
+    { q: "Opposite of big...", options: ["small", "huge", "large", "tall"], answer: 0, explanation: "Small berarti kecil, lawan dari big." },
+    { q: "Past tense of eat...", options: ["ate", "eaten", "eating", "eats"], answer: 0, explanation: "Bentuk simple past dari eat adalah ate." },
+    { q: "We ... to the market tomorrow.", options: ["will go", "go", "went", "going"], answer: 0, explanation: "Will go dapat digunakan untuk menyatakan rencana atau kejadian masa depan." },
+    { q: "He ... English every day.", options: ["studies", "study", "studying", "studied"], answer: 0, explanation: "Dalam simple present, he memakai kata kerja berakhiran -s/-es; study menjadi studies." },
+    { q: "... she your sister?", options: ["Is", "Are", "Am", "Was"], answer: 0, explanation: "Untuk pertanyaan dengan subjek she dan to be sekarang, gunakan is." },
+    { q: "I have ... apple.", options: ["an", "a", "the", "-"], answer: 0, explanation: "An digunakan sebelum bunyi vokal, seperti pada apple." },
+    { q: "The book is ... the table.", options: ["on", "in", "at", "under"], answer: 0, explanation: "On berarti berada di atas permukaan." },
+    { q: "How ... you?", options: ["are", "is", "am", "do"], answer: 0, explanation: "Ungkapan yang benar adalah 'How are you?'" },
+    { q: "My father ... in a bank.", options: ["works", "work", "working", "worked"], answer: 0, explanation: "Subjek tunggal orang ketiga memakai works dalam simple present." },
+    { q: "... time is it?", options: ["What", "When", "Where", "Who"], answer: 0, explanation: "Ungkapan untuk menanyakan jam adalah 'What time is it?'" },
+    { q: "She can ... well.", options: ["sing", "sings", "sang", "singing"], answer: 0, explanation: "Modal can diikuti kata kerja bentuk pertama." },
+    { q: "We ... not late.", options: ["are", "is", "am", "be"], answer: 0, explanation: "We dipasangkan dengan are." },
+    { q: "This ... my bag.", options: ["is", "are", "am", "were"], answer: 0, explanation: "This merujuk pada satu benda, sehingga memakai is." },
+    { q: "They ... from Japan.", options: ["are", "is", "am", "was"], answer: 0, explanation: "They dipasangkan dengan are." },
+    { q: "I ... breakfast at 6 AM.", options: ["have", "has", "having", "had"], answer: 0, explanation: "Untuk kebiasaan dengan subjek I, gunakan have." },
+    { q: "... is your birthday?", options: ["When", "Where", "Who", "What"], answer: 0, explanation: "When digunakan untuk menanyakan waktu." },
+    { q: "He is ... than me.", options: ["taller", "tall", "tallest", "talling"], answer: 0, explanation: "Perbandingan dua orang menggunakan comparative adjective, yaitu taller than." },
+    { q: "The cat is ... the box.", options: ["in", "on", "at", "to"], answer: 0, explanation: "In berarti berada di dalam." },
+    { q: "Do you ... coffee?", options: ["like", "likes", "liking", "liked"], answer: 0, explanation: "Setelah do, kata kerja menggunakan bentuk pertama: like." },
+    { q: "I ... seen that movie.", options: ["have", "has", "had", "having"], answer: 0, explanation: "Present perfect memakai have/has + past participle; subjek I memakai have." },
+    { q: "She ... sleeping now.", options: ["is", "are", "am", "was"], answer: 0, explanation: "Present continuous untuk she memakai is + verb-ing." },
+    { q: "... apples do you want?", options: ["How many", "How much", "How", "What"], answer: 0, explanation: "How many digunakan untuk benda yang dapat dihitung, seperti apples." },
+    { q: "He ... to school by bus.", options: ["goes", "go", "going", "went"], answer: 0, explanation: "Subjek he dalam simple present memakai goes." },
+    { q: "Good ...!", options: ["morning", "mourning", "moring", "mornink"], answer: 0, explanation: "Sapaan pagi yang benar adalah 'Good morning'." }
+  ],
+  ppkn: [
+    { q: "Pancasila sebagai dasar negara disahkan...", options: ["18 Agustus 1945", "17 Agustus 1945", "1 Juni 1945", "1 Oktober 1945"], answer: 0, explanation: "PPKI mengesahkan UUD 1945 yang memuat rumusan Pancasila pada 18 Agustus 1945." },
+    { q: "Sila pertama Pancasila adalah...", options: ["Ketuhanan", "Kemanusiaan", "Persatuan", "Keadilan"], answer: 0, explanation: "Sila pertama berbunyi Ketuhanan Yang Maha Esa." },
+    { q: "UUD 1945 Pasal 1 ayat 1 menyatakan...", options: ["Indonesia ialah negara kesatuan yang berbentuk republik", "Presiden memegang kekuasaan", "Kedaulatan di tangan rakyat", "Negara berdasar Ketuhanan"], answer: 0, explanation: "Pasal 1 ayat (1) menyatakan Indonesia ialah negara kesatuan yang berbentuk republik." },
+    { q: "Lambang negara Indonesia...", options: ["Garuda Pancasila", "Bendera Merah Putih", "Padi dan kapas", "Bintang"], answer: 0, explanation: "Lambang negara Indonesia adalah Garuda Pancasila." },
+    { q: "Semboyan Bhinneka Tunggal Ika berarti...", options: ["Berbeda-beda tetapi tetap satu", "Satu untuk semua", "Bersama kita bisa", "Bersatu dalam perbedaan indah"], answer: 0, explanation: "Maknanya berbeda-beda tetapi tetap satu." },
+    { q: "Lembaga yang memegang kekuasaan membentuk undang-undang...", options: ["DPR", "MA", "MK", "Presiden"], answer: 0, explanation: "DPR memegang kekuasaan membentuk undang-undang, dengan proses pembahasan bersama Presiden." },
+    { q: "Ketentuan HAM secara khusus terdapat dalam UUD 1945 Pasal...", options: ["28A sampai 28J", "Pasal 1", "Pasal 10", "Pasal 5"], answer: 0, explanation: "Pasal 28A sampai 28J memuat berbagai ketentuan hak asasi manusia." },
+    { q: "Sumpah Pemuda diperingati pada...", options: ["28 Oktober 1928", "28 Oktober 1929", "28 Oktober 1945", "28 Oktober 1930"], answer: 0, explanation: "Sumpah Pemuda diikrarkan pada 28 Oktober 1928." },
+    { q: "Ketua BPUPKI adalah...", options: ["Radjiman Wedyodiningrat", "Soekarno", "Mohammad Hatta", "Mohammad Yamin"], answer: 0, explanation: "Ketua BPUPKI adalah Dr. Radjiman Wedyodiningrat." },
+    { q: "Gotong royong mencerminkan sila...", options: ["Ke-3", "Ke-1", "Ke-2", "Ke-5"], answer: 0, explanation: "Gotong royong dapat memperkuat persatuan, yang berkaitan dengan sila ketiga." },
+    { q: "Demokrasi Pancasila mengutamakan...", options: ["Musyawarah", "Voting saja", "Kekuasaan raja", "Militer"], answer: 0, explanation: "Musyawarah dan mufakat merupakan prinsip penting demokrasi Pancasila." },
+    { q: "Salah satu kewajiban warga negara...", options: ["Membayar pajak sesuai ketentuan", "Merusak fasilitas", "Tidak sekolah", "Melanggar hukum"], answer: 0, explanation: "Membayar pajak merupakan kewajiban warga negara yang diatur hukum." },
+    { q: "Pemilu pertama di Indonesia dilaksanakan pada...", options: ["1955", "1945", "1965", "1998"], answer: 0, explanation: "Pemilu nasional pertama dilaksanakan pada 1955." },
+    { q: "Bendera negara diatur dalam UU...", options: ["No. 24 Tahun 2009", "No. 10 Tahun 2000", "No. 5 Tahun 1990", "No. 1 Tahun 1945"], answer: 0, explanation: "UU Nomor 24 Tahun 2009 mengatur bendera, bahasa, lambang negara, dan lagu kebangsaan." },
+    { q: "Semboyan Bhinneka Tunggal Ika terdapat pada...", options: ["Pita yang dicengkeram Garuda", "Sayap Garuda", "Dada Garuda", "Ekor Garuda"], answer: 0, explanation: "Semboyan tertulis pada pita yang dicengkeram Garuda Pancasila." },
+    { q: "Norma yang memiliki sanksi tegas dan dapat dipaksakan oleh negara...", options: ["Hukum", "Kesusilaan", "Kesopanan", "Agama"], answer: 0, explanation: "Norma hukum memiliki sanksi resmi yang dapat ditegakkan oleh negara." },
+    { q: "Presiden pertama Republik Indonesia...", options: ["Soekarno", "Mohammad Hatta", "Soeharto", "B. J. Habibie"], answer: 0, explanation: "Soekarno adalah presiden pertama Republik Indonesia." },
+    { q: "Proklamasi Kemerdekaan dibacakan di...", options: ["Pegangsaan Timur No. 56", "Istana Merdeka", "Monas", "Gedung DPR"], answer: 0, explanation: "Proklamasi dibacakan di Jalan Pegangsaan Timur No. 56, Jakarta." },
+    { q: "Salah satu tujuan negara dalam Pembukaan UUD 1945 alinea keempat...", options: ["Mencerdaskan kehidupan bangsa", "Menjajah bangsa lain", "Memperkaya pejabat", "Membatasi rakyat"], answer: 0, explanation: "Pembukaan UUD 1945 menyebut tujuan mencerdaskan kehidupan bangsa." },
+    { q: "Lembaga peradilan tertinggi dalam lingkungan peradilan umum...", options: ["Mahkamah Agung", "DPR", "Presiden", "MPR"], answer: 0, explanation: "Mahkamah Agung merupakan puncak badan peradilan di Indonesia." },
+    { q: "Hak untuk memilih dalam pemilu disebut...", options: ["Hak pilih", "Hak veto", "Hak interpelasi", "Hak amandemen"], answer: 0, explanation: "Hak pilih adalah hak warga yang memenuhi syarat untuk memilih." },
+    { q: "Contoh sikap persatuan di sekolah...", options: ["Piket bersama", "Tawuran", "Bolos", "Menyontek"], answer: 0, explanation: "Piket bersama menunjukkan kerja sama untuk kepentingan kelas." },
+    { q: "Pancasila sebagai pandangan hidup disebut...", options: ["Way of life", "Way of dead", "Way of go", "Way of back"], answer: 0, explanation: "Way of life berarti pedoman atau pandangan hidup." },
+    { q: "UUD 1945 telah diamandemen sebanyak...", options: ["4 kali", "1 kali", "2 kali", "10 kali"], answer: 0, explanation: "UUD 1945 mengalami empat tahap perubahan pada 1999 sampai 2002." },
+    { q: "Sila Keadilan Sosial bagi Seluruh Rakyat Indonesia dilambangkan...", options: ["Padi dan kapas", "Bintang", "Rantai", "Pohon beringin"], answer: 0, explanation: "Padi dan kapas adalah lambang sila kelima." },
+    { q: "Ungkapan NKRI harga mati menekankan...", options: ["Menjaga keutuhan negara", "Negara boleh dijual", "Negara bisa dibagi", "Persatuan hanya sementara"], answer: 0, explanation: "Ungkapan itu menegaskan komitmen menjaga keutuhan Negara Kesatuan Republik Indonesia." },
+    { q: "Contoh bela negara bagi pelajar...", options: ["Belajar dengan rajin dan bertanggung jawab", "Bertindak anarkis", "Mengabaikan upacara", "Membuang sampah sembarangan"], answer: 0, explanation: "Belajar dengan sungguh-sungguh adalah salah satu bentuk kontribusi pelajar." },
+    { q: "Lembaga yang mengawasi penyelenggaraan pemilu...", options: ["Bawaslu", "KPU", "KPK", "Polri"], answer: 0, explanation: "Bawaslu bertugas mengawasi penyelenggaraan pemilu." },
+    { q: "Musyawarah untuk mencapai mufakat berkaitan dengan sila...", options: ["Ke-4", "Ke-1", "Ke-2", "Ke-3"], answer: 0, explanation: "Sila keempat menekankan kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan." },
+    { q: "Kewarganegaraan Indonesia diatur dalam UU Nomor...", options: ["12 Tahun 2006", "10 Tahun 2005", "5 Tahun 2000", "1 Tahun 1945"], answer: 0, explanation: "UU Nomor 12 Tahun 2006 mengatur kewarganegaraan Republik Indonesia." }
+  ],
+  ips: [
+    { q: "Ilmu yang mempelajari pembuatan dan penggunaan peta...", options: ["Kartografi", "Geologi", "Ekonomi", "Sosiologi"], answer: 0, explanation: "Kartografi adalah ilmu dan teknik pembuatan peta." },
+    { q: "Benua terluas di dunia...", options: ["Asia", "Eropa", "Afrika", "Australia"], answer: 0, explanation: "Asia merupakan benua terluas berdasarkan luas wilayah." },
+    { q: "Garis khayal yang digunakan sebagai dasar pembagian zona waktu adalah garis...", options: ["Bujur", "Lintang", "Khatulistiwa", "Equator"], answer: 0, explanation: "Garis bujur menjadi dasar pembagian zona waktu." },
+    { q: "Samudra terluas...", options: ["Pasifik", "Atlantik", "Hindia", "Arktik"], answer: 0, explanation: "Samudra Pasifik merupakan samudra terluas." },
+    { q: "Pelaku ekonomi yang menggunakan barang atau jasa disebut...", options: ["Konsumen", "Produsen", "Distributor", "Investor"], answer: 0, explanation: "Konsumen menggunakan barang atau jasa untuk memenuhi kebutuhan." },
+    { q: "Mata uang Jepang...", options: ["Yen", "Won", "Dollar", "Euro"], answer: 0, explanation: "Mata uang Jepang adalah yen." },
+    { q: "Gunung tertinggi di dunia di atas permukaan laut...", options: ["Everest", "Merapi", "Bromo", "Fuji"], answer: 0, explanation: "Gunung Everest merupakan puncak tertinggi di atas permukaan laut." },
+    { q: "Sungai terpanjang di Indonesia yang biasa disebut dalam buku pelajaran...", options: ["Kapuas", "Mahakam", "Musi", "Bengawan Solo"], answer: 0, explanation: "Sungai Kapuas di Kalimantan dikenal sebagai sungai terpanjang di Indonesia." },
+    { q: "ASEAN berdiri pada tahun...", options: ["1967", "1945", "1990", "2000"], answer: 0, explanation: "ASEAN didirikan pada 8 Agustus 1967." },
+    { q: "Ibu kota Australia...", options: ["Canberra", "Sydney", "Melbourne", "Perth"], answer: 0, explanation: "Ibu kota Australia adalah Canberra, bukan Sydney." },
+    { q: "Barang kebutuhan pokok sehari-hari sering disebut...", options: ["Sembako", "Barang mewah", "Barang tersier", "Barang sekunder"], answer: 0, explanation: "Sembako adalah singkatan dari sembilan bahan pokok." },
+    { q: "Pasar yang mempertemukan penjual dan pembeli secara langsung secara tradisional...", options: ["Pasar tradisional", "Pasar modal", "Pasar online", "Pasar abstrak"], answer: 0, explanation: "Pasar tradisional biasanya mempertemukan penjual dan pembeli secara langsung." },
+    { q: "Sumber primer untuk mempelajari proklamasi...", options: ["Teks proklamasi asli", "Buku pelajaran", "Cerita orang", "Film"], answer: 0, explanation: "Sumber primer berasal langsung dari masa atau peristiwa yang diteliti." },
+    { q: "Tahun Indonesia memproklamasikan kemerdekaan dari penjajahan...", options: ["1945", "1942", "1949", "1950"], answer: 0, explanation: "Indonesia memproklamasikan kemerdekaan pada 17 Agustus 1945." },
+    { q: "Pahlawan yang berasal dari Makassar...", options: ["Sultan Hasanuddin", "Diponegoro", "Imam Bonjol", "Cut Nyak Dien"], answer: 0, explanation: "Sultan Hasanuddin adalah pahlawan dari Kerajaan Gowa di Sulawesi Selatan." },
+    { q: "Salah satu suku di Papua...", options: ["Asmat", "Bugis", "Jawa", "Sunda"], answer: 0, explanation: "Suku Asmat berasal dari wilayah Papua." },
+    { q: "Iklim Indonesia secara umum...", options: ["Tropis", "Subtropis", "Dingin", "Gurun"], answer: 0, explanation: "Indonesia berada di wilayah tropis." },
+    { q: "Wilayah Indonesia yang dikenal memiliki tambang emas besar...", options: ["Papua", "Jawa", "Kalimantan", "Sumatra"], answer: 0, explanation: "Papua dikenal memiliki kawasan tambang emas berskala besar." },
+    { q: "Ekspor berarti...", options: ["Menjual barang ke luar negeri", "Membeli barang dari luar negeri", "Menjual hanya di dalam negeri", "Membeli barang dalam negeri"], answer: 0, explanation: "Ekspor adalah kegiatan menjual barang atau jasa ke luar negeri." },
+    { q: "Candi Borobudur terletak di...", options: ["Magelang", "Yogyakarta", "Jakarta", "Bali"], answer: 0, explanation: "Candi Borobudur terletak di Kabupaten Magelang, Jawa Tengah." },
+    { q: "Selat yang memisahkan Pulau Jawa dan Sumatra...", options: ["Sunda", "Malaka", "Makassar", "Lombok"], answer: 0, explanation: "Selat Sunda berada di antara Jawa dan Sumatra." },
+    { q: "Negara dengan jumlah penduduk terbesar saat ini adalah...", options: ["India (dahulu sering dipasangkan dengan China)", "Amerika Serikat", "Rusia", "Indonesia"], answer: 0, explanation: "India kini memiliki jumlah penduduk terbesar; China juga termasuk yang terbesar." },
+    { q: "Lembaga keuangan bukan bank...", options: ["Pegadaian", "BRI", "BCA", "Mandiri"], answer: 0, explanation: "Pegadaian merupakan lembaga jasa keuangan nonbank." },
+    { q: "Skala peta 1:100.000 berarti...", options: ["1 cm di peta = 1 km sebenarnya", "1 cm = 100 km", "1 cm = 10 km", "1 cm = 100 m"], answer: 0, explanation: "100.000 cm di lapangan sama dengan 1 km." },
+    { q: "Zaman batu tua disebut...", options: ["Paleolitikum", "Neolitikum", "Megalitikum", "Mesolitikum"], answer: 0, explanation: "Paleolitikum dikenal sebagai zaman batu tua." },
+    { q: "Kerja sama Indonesia dan Malaysia dapat dilakukan di bidang...", options: ["Ekonomi", "Militer saja", "Tidak ada kerja sama", "Perang"], answer: 0, explanation: "Kedua negara bekerja sama dalam berbagai bidang, termasuk ekonomi." },
+    { q: "Contoh interaksi sosial...", options: ["Jual beli", "Tidur sendiri", "Diam sendiri", "Makan sendiri"], answer: 0, explanation: "Jual beli melibatkan hubungan antara penjual dan pembeli." },
+    { q: "Salah satu penyebab urbanisasi...", options: ["Peluang lapangan kerja di kota", "Sawah subur di desa", "Udara desa segar", "Banyak teman di desa"], answer: 0, explanation: "Sebagian orang pindah ke kota untuk mencari pekerjaan." },
+    { q: "Sumber daya alam yang dapat diperbarui...", options: ["Matahari", "Minyak bumi", "Batu bara", "Emas"], answer: 0, explanation: "Energi matahari tersedia terus-menerus dalam skala waktu manusia." },
+    { q: "Letak astronomis Indonesia adalah sekitar...", options: ["6° LU–11° LS dan 95° BT–141° BT", "0°–90° LU", "10° LU–20° LS", "50° BT–60° BT"], answer: 0, explanation: "Indonesia terletak sekitar 6° LU sampai 11° LS dan 95° BT sampai 141° BT." }
+  ],
+  ipa: [
+    { q: "Alat untuk mengukur suhu...", options: ["Termometer", "Barometer", "Amperemeter", "Voltmeter"], answer: 0, explanation: "Termometer digunakan untuk mengukur suhu." },
+    { q: "Fotosintesis pada tumbuhan umumnya berlangsung terutama di...", options: ["Daun", "Akar", "Batang", "Bunga"], answer: 0, explanation: "Daun memiliki banyak sel berkloroplas untuk melakukan fotosintesis." },
+    { q: "Bagian darah yang membawa sebagian besar oksigen...", options: ["Sel darah merah", "Sel darah putih", "Plasma", "Trombosit"], answer: 0, explanation: "Hemoglobin di dalam sel darah merah mengikat oksigen." },
+    { q: "Planet terdekat dari Matahari...", options: ["Merkurius", "Venus", "Bumi", "Mars"], answer: 0, explanation: "Merkurius adalah planet yang paling dekat dengan Matahari." },
+    { q: "Gaya yang menarik benda ke arah Bumi...", options: ["Gravitasi", "Gesek", "Magnet", "Listrik"], answer: 0, explanation: "Gaya gravitasi menarik benda bermassa satu sama lain." },
+    { q: "Satuan SI untuk energi...", options: ["Joule", "Watt", "Newton", "Ampere"], answer: 0, explanation: "Energi diukur dalam joule; watt adalah satuan daya." },
+    { q: "Hewan mamalia...", options: ["Paus", "Ikan mas", "Ayam", "Ular"], answer: 0, explanation: "Paus adalah mamalia yang bernapas dengan paru-paru dan menyusui anaknya." },
+    { q: "Perubahan wujud dari padat menjadi cair...", options: ["Mencair", "Membeku", "Menguap", "Menyublim"], answer: 0, explanation: "Mencair adalah perubahan wujud padat menjadi cair." },
+    { q: "Tulang terbesar dan terkuat pada tubuh manusia...", options: ["Tulang paha", "Tulang jari", "Tulang hidung", "Tulang telinga"], answer: 0, explanation: "Femur atau tulang paha merupakan tulang terpanjang dan sangat kuat." },
+    { q: "Organ utama sistem pernapasan manusia...", options: ["Paru-paru", "Jantung", "Ginjal", "Hati"], answer: 0, explanation: "Paru-paru menjadi tempat pertukaran oksigen dan karbon dioksida." },
+    { q: "Dalam rantai makanan, padi dapat dimakan oleh...", options: ["Tikus", "Singa", "Elang", "Serigala"], answer: 0, explanation: "Tikus dapat memakan padi dan kemudian menjadi mangsa hewan lain." },
+    { q: "Zat hijau daun...", options: ["Klorofil", "Karoten", "Xantofil", "Antosianin"], answer: 0, explanation: "Klorofil menyerap energi cahaya untuk fotosintesis." },
+    { q: "Contoh listrik statis...", options: ["Penggaris yang digosok rambut menarik potongan kertas", "Lampu menyala", "Kipas angin berputar", "Kulkas bekerja"], answer: 0, explanation: "Gesekan dapat memindahkan muatan sehingga penggaris menarik potongan kertas." },
+    { q: "Bagian mata yang menerima bayangan...", options: ["Retina", "Telinga", "Hidung", "Kulit"], answer: 0, explanation: "Retina memiliki sel peka cahaya yang mengubah cahaya menjadi sinyal saraf." },
+    { q: "Pada tekanan udara normal, air mendidih sekitar...", options: ["100°C", "0°C", "50°C", "200°C"], answer: 0, explanation: "Pada tekanan 1 atmosfer, titik didih air sekitar 100°C." },
+    { q: "Sumber energi utama bagi sebagian besar proses di Bumi...", options: ["Matahari", "Bulan", "Bintang lain", "Lampu"], answer: 0, explanation: "Matahari memasok energi bagi fotosintesis dan banyak proses alam." },
+    { q: "Hewan berdarah dingin dalam pilihan berikut...", options: ["Buaya", "Kucing", "Anjing", "Burung"], answer: 0, explanation: "Buaya adalah reptil yang suhu tubuhnya dipengaruhi lingkungan." },
+    { q: "Otot yang bekerja tanpa disadari dan berdenyut terus-menerus...", options: ["Otot jantung", "Otot tangan", "Otot kaki", "Otot leher"], answer: 0, explanation: "Otot jantung bekerja otomatis untuk memompa darah." },
+    { q: "Salah satu penyebab pencemaran udara...", options: ["Asap kendaraan", "Air bersih", "Banyak pohon", "Hujan"], answer: 0, explanation: "Asap kendaraan dapat mengandung partikel dan gas pencemar." },
+    { q: "Urutan metamorfosis kupu-kupu yang benar...", options: ["Telur-larva-pupa-imago", "Telur-imago-larva", "Larva-telur-pupa", "Pupa-telur-larva"], answer: 0, explanation: "Kupu-kupu berkembang melalui tahap telur, larva, pupa, lalu imago." },
+    { q: "Rumus kimia air...", options: ["H₂O", "CO₂", "O₂", "N₂"], answer: 0, explanation: "Molekul air tersusun dari dua atom hidrogen dan satu atom oksigen." },
+    { q: "Alat untuk mengukur beda potensial listrik...", options: ["Voltmeter", "Termometer", "Penggaris", "Timbangan"], answer: 0, explanation: "Voltmeter mengukur beda potensial listrik." },
+    { q: "Gerhana Bulan terjadi ketika...", options: ["Bumi berada di antara Matahari dan Bulan", "Bulan berada di antara Matahari dan Bumi", "Matahari hilang", "Bulan hilang"], answer: 0, explanation: "Bumi menghalangi cahaya Matahari yang seharusnya menuju Bulan." },
+    { q: "Salah satu kebutuhan fotosintesis...", options: ["Cahaya", "Gelap", "Es", "Garam"], answer: 0, explanation: "Tumbuhan menggunakan energi cahaya dalam proses fotosintesis." },
+    { q: "Kekurangan vitamin C dapat menyebabkan...", options: ["Skorbut, yang dapat disertai gusi mudah berdarah", "Rabun senja", "Gondok", "Anemia karena kekurangan zat besi"], answer: 0, explanation: "Kekurangan vitamin C berat menyebabkan skorbut; sariawan sendiri punya banyak penyebab." },
+    { q: "Bunyi merambat paling cepat melalui...", options: ["Benda padat", "Udara", "Vakum", "Air"], answer: 0, explanation: "Bunyi umumnya merambat lebih cepat dalam padatan daripada cairan dan gas, dan tidak merambat di vakum." },
+    { q: "Hewan herbivora...", options: ["Sapi", "Harimau", "Singa", "Buaya"], answer: 0, explanation: "Herbivora adalah hewan yang memakan tumbuhan." },
+    { q: "Pembuluh darah yang membawa darah keluar dari jantung...", options: ["Arteri", "Vena", "Kapiler", "Limfa"], answer: 0, explanation: "Arteri membawa darah menjauhi jantung." },
+    { q: "Contoh energi alternatif...", options: ["Energi surya", "Minyak bumi", "Batu bara", "Bensin"], answer: 0, explanation: "Energi surya berasal dari cahaya Matahari." },
+    { q: "Lapisan Bumi paling luar...", options: ["Kerak", "Mantel", "Inti luar", "Inti dalam"], answer: 0, explanation: "Kerak adalah lapisan terluar Bumi." }
+  ]
+};
+let activeSubject = 'math';
+let questions = subjectQuestions[activeSubject];
+
+let current = 0, selected = null, score = 0, userAnswers = [];
+let timerInterval = null, phase = 'reading', timeLeft = READ_TIME;
+let bgm = null, audioCtx = null;
+const root = document.getElementById('root');
+
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function unlockAudio() {
+  try {
+    const ctx = getCtx();
+    const buf = ctx.createBuffer(1,1,22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf; src.connect(ctx.destination); src.start(0);
+  } catch(e) {}
+  const a = new Audio(MUSIC_URL);
+  a.volume = 0;
+  a.play().then(() => { a.pause(); }).catch(() => {});
+  document.getElementById('sound-btn').textContent = '🔊 Suara Aktif!';
+  document.getElementById('sound-btn').classList.add('active');
+}
+function startBGM() {
+  stopBGM();
+  bgm = new Audio(MUSIC_URL);
+  bgm.loop = true; bgm.volume = 0.5;
+  const p = bgm.play();
+  if (p) p.catch(() => {});
+}
+function stopBGM() {
+  if (bgm) { bgm.pause(); bgm.currentTime = 0; bgm = null; }
+}
+function playBeep(freq, type, vol, dur) {
+  try {
+    const ctx = getCtx();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = freq; o.type = type;
+    g.gain.setValueAtTime(vol, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    o.start(ctx.currentTime); o.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+function playTimeoutSound() { stopBGM(); [880,660,440,330].forEach((f,i) => setTimeout(() => playBeep(f,'square',0.3,0.15), i*180)); }
+function playCorrectSound() { stopBGM(); [523,659,784].forEach((f,i) => setTimeout(() => playBeep(f,'sine',0.2,0.1), i*120)); }
+function playWrongSound() { stopBGM(); playBeep(220,'sawtooth',0.2,0.4); }
+function playReadingBeep() { playBeep(660,'sine',0.08,0.08); }
+
+function stopTimer() { clearInterval(timerInterval); }
+function startReadingPhase() {
+  phase = 'reading'; timeLeft = READ_TIME;
+  setOptions(true); updateTimerUI();
+  timerInterval = setInterval(() => {
+    timeLeft--; playReadingBeep(); updateTimerUI();
+    if (timeLeft <= 0) { clearInterval(timerInterval); startAnswerPhase(); }
+  }, 1000);
+}
+function startAnswerPhase() {
+  phase = 'running'; timeLeft = ANSWER_TIME;
+  setOptions(false); updateTimerUI();
+  startBGM();
+  timerInterval = setInterval(() => {
+    timeLeft--; updateTimerUI();
+    if (timeLeft <= 0) { clearInterval(timerInterval); onTimeout(); }
+  }, 1000);
+}
+function updateTimerUI() {
+  const el = document.getElementById('timer-box'), ph = document.getElementById('phase-label');
+  if (!el) return;
+  if (phase === 'reading') {
+    el.textContent = '👁 ' + timeLeft + 's'; el.className = 'timer-box reading';
+    if (ph) { ph.textContent = 'Baca soal dulu!'; ph.className = 'phase-label reading'; }
+  } else {
+    el.textContent = '⏱ ' + timeLeft + 's'; el.className = 'timer-box running';
+    if (timeLeft <= 10) el.classList.add('danger');
+    else if (timeLeft <= 15) el.classList.add('warning');
+    if (ph) { ph.textContent = 'Jawab sekarang!'; ph.className = 'phase-label running'; }
+  }
+}
+function setOptions(locked) {
+  for (let i = 0; i < 4; i++) {
+    const btn = document.getElementById('opt-'+i);
+    if (!btn) continue;
+    if (locked) { btn.classList.add('locked'); btn.disabled = true; }
+    else { btn.classList.remove('locked'); btn.disabled = false; }
+  }
+}
+function onTimeout() {
+  playTimeoutSound();
+  const q = questions[current];
+  for (let i = 0; i < q.options.length; i++) {
+    const btn = document.getElementById('opt-'+i);
+    if (btn) { btn.disabled = true; if (i === q.answer) btn.classList.add('reveal-correct'); }
+  }
+  userAnswers.push({ q: q.q, chosen: '(Waktu habis)', correct: q.options[q.answer], isCorrect: false });
+  document.getElementById('feedback').innerHTML = `<div class="feedback-box timeout"><i class="ti ti-clock-x"></i><div><strong>Waktu habis!</strong> Jawaban yang benar: ${q.options[q.answer]}</div></div>`;
+  const isLast = current === questions.length - 1;
+  document.getElementById('nav').innerHTML = `<button class="next-btn" onclick="next()">${isLast?'Lihat Hasil':'Soal Berikutnya'} <i class="ti ti-arrow-right"></i></button>`;
+}
+const subjectInfo = {
+  math: { name:"Matematika", icon:"📐", desc:"Latihan campuran", title:"Kuis Matematika" },
+  informatika: { name:"Informatika", icon:"💻", desc:"Komputer & teknologi", title:"Kuis Informatika Kelas VIII" },
+  indonesia: { name:"Bahasa Indonesia", icon:"📚", desc:"Bahasa & teks", title:"Kuis Bahasa Indonesia Kelas VIII" },
+  inggris: { name:"Bahasa Inggris", icon:"🇬🇧", desc:"Vocabulary & grammar", title:"Kuis Bahasa Inggris Kelas VIII" },
+  ppkn: { name:"PPKn", icon:"🇮🇩", desc:"Pancasila & kewarganegaraan", title:"Kuis Pendidikan Pancasila Kelas VIII" },
+  ips: { name:"IPS", icon:"🌏", desc:"Masyarakat & geografi", title:"Kuis IPS Kelas VIII" },
+  ipa: { name:"IPA", icon:"🔬", desc:"Sains & alam", title:"Kuis IPA Kelas VIII" }
+};
+function renderIntro() {
+  stopTimer(); stopBGM();
+  root.innerHTML = `
+    <div class="intro-wrap" style="padding-top:.5rem;">
+      <div class="intro-icon">🎓</div>
+      <div class="intro-title">Study Quest V6</div>
+      <div class="intro-sub">Pilih pelajaran dan kerjakan 30 soal per mapel, lengkap dengan pembahasan.<br>Total 210 soal latihan + minigame Neon Dodge X.</div>
+      <div style="margin-bottom:.5rem;">
+        <button class="sound-btn" id="sound-btn" onclick="unlockAudio()">🔇 Aktifkan Suara dulu!</button>
+      </div>
+      <div class="intro-subject-label">PILIH MATERI</div>
+      <div class="subject-grid">
+        ${Object.entries(subjectInfo).map(([key, info])=>`<button class="subject-btn ${activeSubject===key?'selected':''}" onclick="selectSubject('${key}')"><span class="subject-emoji">${info.icon}</span><span><div class="subject-name">${info.name}</div><div class="subject-desc">${info.desc}</div></span></button>`).join('')}
+      </div>
+      <div class="intro-sub" style="margin-bottom:.5rem;">Materi dipilih: <strong id="selected-subject">${subjectInfo[activeSubject].name}</strong><br>👁 5 detik untuk membaca soal · ⏱ 30 detik untuk menjawab</div>
+      <button class="start-btn" onclick="startQuiz()"><i class="ti ti-player-play-filled"></i> Mulai Belajar</button>
+      <div class="mini-launch-card">
+        <h3>🕹️ NEON DODGE X</h3>
+        <p>Minigame arcade: hindari blok merah, kumpulkan koin, naik level, dan pecahkan best score. Bisa dimainkan di HP maupun komputer.</p>
+        <button class="mini-launch-btn" onclick="launchMinigame()">MAIN MINIGAME ⚡</button>
+      </div>
+    </div>`;
+}
+function selectSubject(key) {
+  activeSubject = key;
+  questions = subjectQuestions[key];
+  renderIntro();
+}
+function toggleRoster() {
+  const panel = document.getElementById('roster-panel');
+  const button = document.querySelector('.roster-toggle');
+  const isOpen = panel.classList.toggle('open');
+  button.setAttribute('aria-expanded', String(isOpen));
+  button.textContent = isOpen ? '👥 KELAS 7.4 ▴' : '👥 KELAS 7.4 ▾';
+}
+function shuffleQuestionOptions() {
+  // Shuffle answer choices while keeping the correct answer attached to its text.
+  for (const q of questions) {
+    const choices = q.options.map((text, index) => ({ text, correct: index === q.answer }));
+    for (let i = choices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [choices[i], choices[j]] = [choices[j], choices[i]];
+    }
+    q.options = choices.map(choice => choice.text);
+    q.answer = choices.findIndex(choice => choice.correct);
+  }
+}
+function startQuiz() { current = 0; selected = null; score = 0; userAnswers = []; shuffleQuestionOptions(); render(); }
+function render() {
+  if (current >= questions.length) { stopTimer(); stopBGM(); renderResult(); return; }
+  stopTimer(); stopBGM(); selected = null;
+  const q = questions[current], pct = (current/questions.length)*100;
+  root.innerHTML = `
+    <div class="timer-row">
+      <div class="question-counter">${subjectInfo[activeSubject].icon} ${subjectInfo[activeSubject].name} · Soal ${current+1} dari ${questions.length}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="phase-label reading" id="phase-label">Baca soal dulu!</span>
+        <span class="timer-box reading" id="timer-box">👁 ${READ_TIME}s</span>
+      </div>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+    <div class="question-text">${q.q}</div>
+    <div class="options-grid">
+      ${q.options.map((opt,i)=>`<button class="option-btn locked" id="opt-${i}" onclick="choose(${i})" disabled>${opt}</button>`).join('')}
+    </div>
+    <div id="feedback"></div>
+    <div class="nav-row" id="nav"></div>`;
+  startReadingPhase();
+}
+function choose(idx) {
+  if (selected !== null || phase === 'reading') return;
+  stopTimer(); stopBGM(); selected = idx;
+  const q = questions[current], isCorrect = idx === q.answer;
+  if (isCorrect) { score++; playCorrectSound(); } else { playWrongSound(); }
+  userAnswers.push({ q: q.q, chosen: q.options[idx], correct: q.options[q.answer], isCorrect });
+  for (let i = 0; i < q.options.length; i++) {
+    const btn = document.getElementById('opt-'+i); btn.disabled = true;
+    if (i === q.answer) btn.classList.add(idx===i?'correct':'reveal-correct');
+    else if (i===idx && !isCorrect) btn.classList.add('wrong');
+  }
+  document.getElementById('feedback').innerHTML = `<div class="feedback-box ${isCorrect?'correct':'wrong'}"><i class="ti ${isCorrect?'ti-circle-check':'ti-circle-x'}"></i><div><strong>${isCorrect?'Benar!':'Kurang tepat.'}</strong> ${q.explanation}</div></div>`;
+  const isLast = current === questions.length - 1;
+  document.getElementById('nav').innerHTML = `<button class="next-btn" onclick="next()">${isLast?'Lihat Hasil':'Soal Berikutnya'} <i class="ti ti-arrow-right"></i></button>`;
+}
+function next() { current++; render(); }
+function renderResult() {
+  const pct = Math.round((score/questions.length)*100);
+  const verdict = pct===100?"Sempurna! 🎉":pct>=80?"Bagus Sekali! 👏":pct>=60?"Cukup Bagus! 👍":"Tetap Semangat! 💪";
+  // Tiers follow the requested ranges: 1–50%, 51–80%, and above 80%.
+  const tier = pct <= 50 ? 'low' : pct <= 80 ? 'mid' : 'high';
+  const tierMessage = tier === 'low'
+    ? '🎵 Skor 1–50%: mode WKWK aktif.'
+    : tier === 'mid'
+      ? '🔊 Skor 51–80%: bolehlah, lumayan.'
+      : '🏆 Skor di atas 80%: GG! PINATA MELEDAK!';
+  playResultSound(tier);
+  if (tier === 'high') launchPinataBurst();
+  root.innerHTML = `
+    <div class="result-wrap">
+      <div class="score-circle"><span class="score-num">${score}/${questions.length}</span><span class="score-label">${pct}%</span></div>
+      <div class="result-title">${verdict}</div>
+      <div style="font-weight:700;color:#15803d;margin-bottom:8px;">${subjectInfo[activeSubject].name}</div>
+      <div class="result-sub">Kamu menjawab ${score} dari ${questions.length} soal dengan benar.</div>
+      <div class="result-tier ${tier}">${tierMessage}</div>
+      <div class="result-answers">
+        ${userAnswers.map(a=>`<div class="ans-item">
+          <i class="ans-icon ti ${a.isCorrect?'ti-circle-check':'ti-circle-x'}" style="color:${a.isCorrect?'#16a34a':'#dc2626'}"></i>
+          <div><div class="ans-q">${a.q}</div>
+          <div>${a.isCorrect?`<span style="color:#16a34a">${a.correct}</span>`:`<span style="color:#dc2626;text-decoration:line-through">${a.chosen}</span> → <span style="color:#16a34a">${a.correct}</span>`}</div>
+          </div></div>`).join('')}
+      </div>
+      <button class="restart-btn" onclick="startQuiz()"><i class="ti ti-refresh"></i> Ulangi Materi</button> <button class="restart-btn" style="margin-top:8px;background:#166534;" onclick="renderIntro()"><i class="ti ti-books"></i> Pilih Materi Lain</button>
+    </div>`;
+}
+
+// =====================================
+// NEON DODGE X MINI-GAME (integrated)
+// Fixed pointer handler syntax, scoped state,
+// and a single animation-frame loop per launch.
+// =====================================
+let miniRaf = 0;
+let miniActive = false;
+let miniCleanup = [];
+
+function launchMinigame() {
+  stopTimer();
+  stopBGM();
+  miniActive = true;
+  root.innerHTML = document.getElementById('minigame-template').innerHTML;
+  initNeonDodge();
+}
+
+function exitMinigame() {
+  miniActive = false;
+  if (miniRaf) cancelAnimationFrame(miniRaf);
+  miniRaf = 0;
+  miniCleanup.forEach(fn => { try { fn(); } catch (_) {} });
+  miniCleanup = [];
+  input.left = false;
+  input.right = false;
+  input.dragging = false;
+  renderIntro();
+}
+
+function initNeonDodge() {
+  const canvas = document.getElementById('mini-game');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const $ = id => document.getElementById(id);
+  const ui = {
+    score: $('mini-score'), level: $('mini-level'), coins: $('mini-coins'),
+    best: $('mini-best'), overlay: $('mini-overlay'),
+    overlayTitle: $('mini-overlay-title'), overlayText: $('mini-overlay-text'),
+    finalScore: $('mini-final-score'), details: $('mini-overlay-details'),
+    pause: $('mini-pause')
+  };
+  let player, blocks = [], coins = [], particles = [], stars = [];
+  let score = 0, collected = 0, level = 1, elapsed = 0;
+  let blockTimer = .7, coinTimer = 1.3, bgOffset = 0;
+  let gameState = 'playing', last = 0, raf = 0;
+  let left = false, right = false, dragging = false;
+  let best = 0;
+  try { best = Number(localStorage.getItem('neonDodgeBest')) || 0; } catch (_) {}
+  ui.best.textContent = best;
+
+  function reset() {
+    player = { x: W / 2 - 16, y: H - 93, w: 32, h: 38, speed: 300 };
+    blocks = []; coins = []; particles = [];
+    score = 0; collected = 0; level = 1; elapsed = 0;
+    blockTimer = .65; coinTimer = 1.2; bgOffset = 0;
+    left = right = dragging = false;
+    gameState = 'playing'; last = 0;
+    ui.overlay.classList.add('hidden');
+    ui.pause.textContent = 'Ⅱ PAUSE';
+    updateHUD();
+  }
+  function updateHUD() {
+    ui.score.textContent = Math.floor(score);
+    ui.level.textContent = level;
+    ui.coins.textContent = collected;
+  }
+  function spawnBlock() {
+    const size = 24 + Math.random() * 28;
+    blocks.push({ x: 8 + Math.random() * (W - size - 16), y: -size - 5,
+      w: size, h: size, speed: 175 + Math.random() * 75 + level * 15,
+      angle: Math.random() * .2, rotation: (Math.random() - .5) * 2.2 });
+  }
+  function spawnCoin() {
+    coins.push({ x: 20 + Math.random() * (W - 40), y: -25, r: 10,
+      speed: 145 + level * 8, phase: Math.random() * Math.PI * 2 });
+  }
+  function rectHit(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x &&
+      a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+  function circleHit(c, r) {
+    const nx = Math.max(r.x, Math.min(c.x, r.x + r.w));
+    const ny = Math.max(r.y, Math.min(c.y, r.y + r.h));
+    const dx = c.x - nx, dy = c.y - ny;
+    return dx * dx + dy * dy < c.r * c.r;
+  }
+  function burst(x, y, color, amount = 12) {
+    for (let i = 0; i < amount; i++) {
+      const a = Math.random() * Math.PI * 2, speed = Math.random() * 170 + 40;
+      particles.push({ x, y, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed,
+        life: .4 + Math.random() * .55, maxLife: .95, size: Math.random() * 4 + 2, color });
+    }
+  }
+  function endGame() {
+    if (gameState === 'gameover') return;
+    gameState = 'gameover';
+    const final = Math.floor(score);
+    if (final > best) {
+      best = final; ui.best.textContent = best;
+      try { localStorage.setItem('neonDodgeBest', String(best)); } catch (_) {}
+    }
+    ui.overlayTitle.textContent = 'GAME OVER';
+    ui.overlayText.textContent = 'Badai neon berhasil menghentikanmu.';
+    ui.finalScore.textContent = final + ' POINTS';
+    ui.details.textContent = 'Level ' + level + ' • ' + collected + ' koin terkumpul';
+    ui.overlay.classList.remove('hidden');
+    ui.pause.textContent = 'Ⅱ PAUSE';
+  }
+  function update(dt) {
+    if (gameState !== 'playing') return;
+    elapsed += dt; score += dt * 12; level = Math.floor(score / 180) + 1;
+    if (left) player.x -= player.speed * dt;
+    if (right) player.x += player.speed * dt;
+    player.x = Math.max(4, Math.min(W - player.w - 4, player.x));
+    bgOffset = (bgOffset + 25 * dt) % 40;
+    stars.forEach(s => { s.y += s.speed * dt; if (s.y > H) { s.y = -2; s.x = Math.random() * W; } });
+    blockTimer -= dt;
+    if (blockTimer <= 0) {
+      spawnBlock();
+      blockTimer = Math.max(.27, .78 - level * .035) * (.75 + Math.random() * .5);
+    }
+    coinTimer -= dt;
+    if (coinTimer <= 0) { spawnCoin(); coinTimer = 1.3 + Math.random() * 1.2; }
+    for (let i = blocks.length - 1; i >= 0; i--) {
+      const b = blocks[i]; b.y += b.speed * dt; b.angle += b.rotation * dt;
+      if (rectHit(player, b)) { burst(player.x + player.w / 2, player.y + player.h / 2, '#ff316f', 28); endGame(); return; }
+      if (b.y > H + 60) blocks.splice(i, 1);
+    }
+    for (let i = coins.length - 1; i >= 0; i--) {
+      const c = coins[i]; c.y += c.speed * dt; c.phase += dt * 5;
+      if (circleHit(c, player)) { collected++; score += 30; burst(c.x, c.y, '#ffe66d', 14); coins.splice(i, 1); continue; }
+      if (c.y > H + 40) coins.splice(i, 1);
+    }
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i]; p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vx *= Math.max(0, 1 - dt * 1.4); p.vy *= Math.max(0, 1 - dt * 1.4); p.life -= dt;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+    updateHUD();
+  }
+  function draw() {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#080d24'); g.addColorStop(.5, '#080a1b'); g.addColorStop(1, '#030612');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.save(); ctx.strokeStyle = '#132448'; ctx.lineWidth = 1;
+    for (let x = 0; x <= W; x += 42) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = -40 + bgOffset; y <= H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    ctx.restore();
+    for (const s of stars) { ctx.globalAlpha = s.alpha; ctx.fillStyle = '#b8d8ff'; ctx.fillRect(s.x, s.y, s.size, s.size); }
+    ctx.globalAlpha = 1; ctx.fillStyle = 'rgba(0,245,255,.45)'; ctx.fillRect(0, 0, 2, H); ctx.fillRect(W - 2, 0, 2, H);
+    for (const c of coins) {
+      ctx.save(); ctx.translate(c.x, c.y); ctx.scale(1 + Math.sin(c.phase) * .1, 1 + Math.sin(c.phase) * .1);
+      ctx.shadowColor = '#ffe66d'; ctx.shadowBlur = 18; ctx.fillStyle = '#ffe66d';
+      ctx.beginPath(); ctx.arc(0, 0, c.r, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#fff8c5'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#946900'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('$', 0, 1); ctx.restore();
+    }
+    for (const b of blocks) {
+      ctx.save(); ctx.translate(b.x + b.w / 2, b.y + b.h / 2); ctx.rotate(b.angle);
+      ctx.shadowColor = '#ff316f'; ctx.shadowBlur = 18; ctx.fillStyle = '#ff244f';
+      ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h); ctx.strokeStyle = '#ffb3c5'; ctx.lineWidth = 1.5;
+      ctx.strokeRect(-b.w / 2, -b.h / 2, b.w, b.h); ctx.restore();
+    }
+    for (const p of particles) {
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.life / p.maxLife));
+      ctx.fillStyle = p.color; ctx.shadowColor = p.color; ctx.shadowBlur = 9; ctx.fillRect(p.x, p.y, p.size, p.size);
+    }
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+    if (gameState !== 'gameover') {
+      const cx = player.x + player.w / 2, flame = 7 + Math.random() * 8;
+      ctx.save(); ctx.shadowColor = '#00f5ff'; ctx.shadowBlur = 18; ctx.fillStyle = '#ff8b32';
+      ctx.beginPath(); ctx.moveTo(cx - 7, player.y + player.h - 4); ctx.lineTo(cx, player.y + player.h + flame); ctx.lineTo(cx + 7, player.y + player.h - 4); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#00f5ff'; ctx.strokeStyle = '#c9ffff'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(cx, player.y); ctx.lineTo(player.x + player.w, player.y + player.h); ctx.lineTo(cx, player.y + player.h - 9); ctx.lineTo(player.x, player.y + player.h); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.shadowBlur = 7; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(cx, player.y + 12); ctx.lineTo(cx + 5, player.y + 24); ctx.lineTo(cx - 5, player.y + 24); ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    if (gameState === 'paused') {
+      ctx.fillStyle = '#02051099'; ctx.fillRect(0, 0, W, H); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#00f5ff'; ctx.shadowColor = '#00f5ff'; ctx.shadowBlur = 18; ctx.font = 'bold 34px Arial'; ctx.fillText('PAUSED', W / 2, H / 2);
+      ctx.shadowBlur = 0; ctx.fillStyle = '#c3d2ff'; ctx.font = '14px Arial'; ctx.fillText('Tekan LANJUT untuk bermain', W / 2, H / 2 + 40);
+    }
+  }
+  function loop(timestamp) {
+    if (!miniActive || !document.getElementById('mini-game')) return;
+    const dt = last ? Math.min((timestamp - last) / 1000, .032) : 0;
+    last = timestamp;
+    if (gameState === 'playing') update(dt);
+    else if (gameState === 'gameover') {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+    draw();
+    raf = requestAnimationFrame(loop);
+    miniRaf = raf;
+  }
+  function togglePause() {
+    if (gameState === 'playing') { gameState = 'paused'; left = right = false; ui.pause.textContent = '▶ LANJUT'; }
+    else if (gameState === 'paused') { gameState = 'playing'; last = 0; ui.pause.textContent = 'Ⅱ PAUSE'; }
+  }
+  function bindMove(id, dir) {
+    const btn = $(id);
+    const down = e => {
+      e.preventDefault(); if (gameState !== 'playing') return;
+      if (dir === 'left') left = true; else right = true;
+      btn.classList.add('active');
+      try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+    };
+    const up = e => {
+      if (dir === 'left') left = false; else right = false;
+      btn.classList.remove('active');
+      if (e) { try { if (btn.hasPointerCapture(e.pointerId)) btn.releasePointerCapture(e.pointerId); } catch (_) {} }
+    };
+    btn.addEventListener('pointerdown', down);
+    btn.addEventListener('pointerup', up);
+    btn.addEventListener('pointercancel', up);
+    btn.addEventListener('lostpointercapture', up);
+    miniCleanup.push(() => {
+      btn.removeEventListener('pointerdown', down); btn.removeEventListener('pointerup', up);
+      btn.removeEventListener('pointercancel', up); btn.removeEventListener('lostpointercapture', up);
+    });
+  }
+  const pos = e => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width }; };
+  const dragStart = e => {
+    if (gameState !== 'playing') return; e.preventDefault(); dragging = true;
+    player.x = Math.max(0, Math.min(W - player.w, pos(e).x - player.w / 2));
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+  };
+  const dragMove = e => {
+    if (!dragging || gameState !== 'playing') return; e.preventDefault();
+    player.x = Math.max(0, Math.min(W - player.w, pos(e).x - player.w / 2));
+  };
+  const dragEnd = () => { dragging = false; };
+  const keyDown = e => {
+    if (['ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+    if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') left = true;
+    if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') right = true;
+    if (e.key === ' ' && !e.repeat) togglePause();
+    if (e.key.toLowerCase() === 'r' && !e.repeat) reset();
+  };
+  const keyUp = e => {
+    if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') left = false;
+    if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') right = false;
+  };
+  const blur = () => { left = right = dragging = false; };
+  const pauseClick = () => togglePause();
+  const resetClick = () => reset();
+  const playAgain = () => reset();
+  canvas.addEventListener('pointerdown', dragStart);
+  canvas.addEventListener('pointermove', dragMove);
+  canvas.addEventListener('pointerup', dragEnd);
+  canvas.addEventListener('pointercancel', dragEnd);
+  canvas.addEventListener('lostpointercapture', dragEnd);
+  document.addEventListener('keydown', keyDown);
+  document.addEventListener('keyup', keyUp);
+  window.addEventListener('blur', blur);
+  ui.pause.addEventListener('click', pauseClick);
+  $('mini-reset').addEventListener('click', resetClick);
+  $('mini-play-again').addEventListener('click', playAgain);
+  miniCleanup.push(() => {
+    canvas.removeEventListener('pointerdown', dragStart); canvas.removeEventListener('pointermove', dragMove);
+    canvas.removeEventListener('pointerup', dragEnd); canvas.removeEventListener('pointercancel', dragEnd);
+    canvas.removeEventListener('lostpointercapture', dragEnd);
+    document.removeEventListener('keydown', keyDown); document.removeEventListener('keyup', keyUp);
+    window.removeEventListener('blur', blur);
+    ui.pause.removeEventListener('click', pauseClick);
+    $('mini-reset')?.removeEventListener('click', resetClick);
+    $('mini-play-again')?.removeEventListener('click', playAgain);
+  });
+  bindMove('mini-left', 'left'); bindMove('mini-right', 'right');
+  stars = Array.from({length:65}, () => ({
+    x: Math.random() * W, y: Math.random() * H, size: Math.random() * 2 + .5,
+    speed: Math.random() * 24 + 8, alpha: Math.random() * .6 + .2
+  }));
+  reset();
+  draw();
+  miniRaf = requestAnimationFrame(loop);
+}
+
+renderIntro();
+</script>
+</body>
+</html>
